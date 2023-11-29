@@ -41,7 +41,7 @@ router.get('/products/:id', async (req, res) => {
 
 router.post('/checkout', requireAuth, async (req, res) => {
     try {
-        const items = req.body;
+        const items = req.body.cartItems;
         const user = req.user;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
@@ -54,7 +54,7 @@ router.post('/checkout', requireAuth, async (req, res) => {
         }
 
         for (const item of items) {
-            const result = await client.query('SELECT * FROM product WHERE id = $1', [item.productid]);
+            const result = await client.query('SELECT * FROM product WHERE id = $1', [item.id]);
             const product = result.rows[0];
 
             if (!product) {
@@ -98,7 +98,7 @@ router.get('/checkout-history', requireAuth, async (req, res) => {
             const orderItemsResult = await client.query(`
                 SELECT order_items.id, order_items.quantity, product.product AS name, product.size, product.color, product.price
                 FROM order_items
-                JOIN product ON order_items.productid = product.id
+                JOIN product ON order_items.id = product.id
                 WHERE order_items.orderId = $1
             `, [order.id]);
 
